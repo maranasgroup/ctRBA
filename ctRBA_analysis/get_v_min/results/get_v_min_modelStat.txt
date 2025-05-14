@@ -1,0 +1,2 @@
+modelstat:         1.00
+solvestat:         1.00

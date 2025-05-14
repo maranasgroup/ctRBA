@@ -1,0 +1,64 @@
+* Test phenotype to check model connectivity
+* Parameters define in this file will overwrite ones define in GAMS runRBA.gms file
+* Select appropriate biomass reaction (different in GAM value)
+
+* Set growth rate in the python scripts' GAMs execution through os module
+* for this instance, settign to a small value to ensure that the model can produce biomass
+* growth rate
+$setGlobal mu 0.4
+
+* Ribosome efficiency
+$setGlobal kribo 15.599*3600
+
+* Enforce part of proteome allocate to non-modeled protein
+* for now a low number to make sure everything works
+$setGlobal nonmodeled_proteome_allocation 0.3814
+
+* scales biomass by the scale that gets applied to everything
+v.fx('BIOSYN-BIODIL') = %mu% * %nscale%;
+
+* NGAM
+* Value taken from iCTH669
+v.lo('RXN-ATPM_FWD-SPONT') = 1.744781003 * %nscale%;
+
+* Substrate uptake limit. For now just setting to the arbitrary basis of 100 units of glucose
+* from Daven the rate of cellobiose uptake is: 
+*4.2+-0.3 according to Daven
+$setGlobal cellb_up_rate 4.2
+
+*number of C6 units in cellobiose this is needed to scale cellobiose yield
+$setGlobal cellb_c6 2
+
+* require allow up the the maximum rate of cellobiose uptake
+v.up('RXN-EXCH_cellb_e_REV-SBP_cellx') = %cellb_up_rate% * %nscale%;
+v.lo('RXN-EXCH_cellb_e_REV-SBP_cellx') = %cellb_up_rate% * %nscale%;
+
+*don't allow cellobiose reexport
+v.fx('RXN-EXCH_cellb_e_FWD-SPONT') = 0 * %nscale%;
+
+* enforce carbon yeilds carbon uptake is 
+v.lo(carbs) = c_min_f(carbs) * %cellb_up_rate% * %cellb_c6% * %nscale%;
+v.up(carbs) = c_max_f(carbs) * %cellb_up_rate% * %cellb_c6% * %nscale%;
+
+*require protein synthesis
+v.up(prosyn_met) = prosyn_met_rates(prosyn_met) * %nscale%;
+v.lo(prosyn_met) = prosyn_met_rates(prosyn_met) * %nscale%;
+v.up(prosyn_cell) = prosyn_cell_rates(prosyn_cell) * %nscale%;
+v.lo(prosyn_cell) = prosyn_cell_rates(prosyn_cell) * %nscale%;
+
+*turn off reations unused in vivo or those not shown to carry flux
+v.fx("RXN-ALCD2y_FWD-gbsB_1798") = 0;
+v.fx("RXN-OAADC_FWD-maeB") = 0;
+v.fx("RXN-OAADC_FWD-pycA") = 0;
+v.fx("RXN-ACS2_FWD-ytcI") = 0;
+v.fx("RXN-FNOR_FWD-pyrK") = 0;
+v.fx("RXN-FORabc_FWD-UNKNOWN") = 0;
+v.fx("RXN-LACLabc_FWD-UNKNOWN") = 0;
+v.fx("RXN-PYRabc_FWD-UNKNOWN") = 0;
+v.fx("RXN-MALLabc_FWD-UNKNOWN") = 0;
+v.fx("RXN-FUMabc_FWD-UNKNOWN") = 0;
+v.fx("RXN-ACabc_FWD-UNKNOWN") = 0;
+v.fx("RXN-DM_TEST_FWD-SPONT") = 0;
+
+*turn off glycogen dumping
+*v.up('RXN-EXCH_glycogen_c_FWD-SPONT') = 0 * %nscale%;

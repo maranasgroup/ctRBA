@@ -1,0 +1,2 @@
+Validation results
+(<Model iCTH669 at 0x2758e7a2760>, {'SBML_FATAL': [], 'SBML_ERROR': [], 'SBML_SCHEMA_ERROR': [], 'SBML_WARNING': [], 'COBRA_FATAL': [], 'COBRA_ERROR': [], 'COBRA_WARNING': [], 'COBRA_CHECK': []})

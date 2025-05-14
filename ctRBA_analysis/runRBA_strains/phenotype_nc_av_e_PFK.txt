@@ -1,0 +1,83 @@
+* Test phenotype to check model connectivity
+* Parameters define in this file will overwrite ones define in GAMS runRBA.gms file
+* Select appropriate biomass reaction (different in GAM value)
+
+* Ribosome efficiency
+$setGlobal kribo 15.37*3600
+
+* Enforce part of proteome allocate to non-modeled protein
+* for now a low number to make sure everything works
+$setGlobal nonmodeled_proteome_allocation 0.3814
+
+* NGAM
+* Value taken from iCTH669
+v.lo('RXN-ATPM_FWD-SPONT') = 1.744781003 * %nscale%;
+
+* Substrate uptake limit. For now just setting to the arbitrary basis of 100 units of glucose
+* from Beri et al 2021 the rate of maximum avicel uptake is: 0.45 g/L h
+*Based on calculations of average avicel MW (35.689 g/mmol based on 220 C6 units per avicel average) and assumed mid-exponential biomass concentration of 0.4071 gDW/L
+*see supplemental file 1 for sources and calculations
+$setGlobal c6_up_rate 6.814
+
+*fraction of c6 for each type of cellodextrin
+$setGlobal glc_up_frac 5.20742E-10
+$setGlobal cellb_up_frac 2.61383E-05
+$setGlobal cell3_up_frac 1.52377E-02
+$setGlobal cell4_up_frac 1.61802E-01
+$setGlobal cell5_up_frac 6.07311E-02
+$setGlobal cell6_up_frac 5.61579E-04
+
+* require allow up the the maximum rate of cellodextrin uptake
+v.fx('RXN-EXCH_glc__D_e_REV-SBP_cellx') = %c6_up_rate% * %glc_up_frac% * %nscale%;
+v.fx('RXN-EXCH_cellb_e_REV-SBP_cellx') = %c6_up_rate% * %cellb_up_frac% * %nscale%;
+v.fx('RXN-EXCH_cell3_e_REV-SBP_cellx') = %c6_up_rate% * %cell3_up_frac% * %nscale%;
+v.fx('RXN-EXCH_cell4_e_REV-SBP_cellx') = %c6_up_rate% * %cell4_up_frac% * %nscale%;
+v.fx('RXN-EXCH_cell5_e_REV-SBP_cellx') = %c6_up_rate% * %cell5_up_frac% * %nscale%;
+v.fx('RXN-EXCH_cell6_e_REV-SBP_cellx') = %c6_up_rate% * %cell6_up_frac% * %nscale%;
+
+*uncomment to use different upper and lower bounds
+*v.up('RXN-EXCH_glc__D_e_REV-SBP_cellx') = %c6_up_rate% * %glc_up_frac% * %nscale%;
+*v.up('RXN-EXCH_cellb_e_REV-SBP_cellx') = %c6_up_rate% * %cellb_up_frac% * %nscale%;
+*v.up('RXN-EXCH_cell3_e_REV-SBP_cellx') = %c6_up_rate% * %cell3_up_frac% * %nscale%;
+*v.up('RXN-EXCH_cell4_e_REV-SBP_cellx') = %c6_up_rate% * %cell4_up_frac% * %nscale%;
+*v.up('RXN-EXCH_cell5_e_REV-SBP_cellx') = %c6_up_rate% * %cell5_up_frac% * %nscale%;
+*v.up('RXN-EXCH_cell6_e_REV-SBP_cellx') = %c6_up_rate% * %cell6_up_frac% * %nscale%;
+*v.lo('RXN-EXCH_glc__D_e_REV-SBP_cellx') = %c6_up_rate% * %glc_up_frac% * %nscale%;
+*v.lo('RXN-EXCH_cellb_e_REV-SBP_cellx') = %c6_up_rate% * %cellb_up_frac% * %nscale%;
+*v.lo('RXN-EXCH_cell3_e_REV-SBP_cellx') = %c6_up_rate% * %cell3_up_frac% * %nscale%;
+*v.lo('RXN-EXCH_cell4_e_REV-SBP_cellx') = %c6_up_rate% * %cell4_up_frac% * %nscale%;
+*v.lo('RXN-EXCH_cell5_e_REV-SBP_cellx') = %c6_up_rate% * %cell5_up_frac% * %nscale%;
+*v.lo('RXN-EXCH_cell6_e_REV-SBP_cellx') = %c6_up_rate% * %cell6_up_frac% * %nscale%;
+
+*don't allow cellodextrin reexport
+v.fx('RXN-EXCH_glc__D_e_FWD-SPONT') = 0 * %nscale%;
+v.fx('RXN-EXCH_cellb_e_FWD-SPONT') = 0 * %nscale%;
+v.fx('RXN-EXCH_cell3_e_FWD-SPONT') = 0 * %nscale%;
+v.fx('RXN-EXCH_cell4_e_FWD-SPONT') = 0 * %nscale%;
+v.fx('RXN-EXCH_cell5_e_FWD-SPONT') = 0 * %nscale%;
+v.fx('RXN-EXCH_cell6_e_FWD-SPONT') = 0 * %nscale%;
+
+* enforce carbon yeilds carbon uptake is 
+*v.lo(carbs) = c_min_f(carbs) * %c6_up_rate% * %nscale%;
+*v.up(carbs) = c_max_f(carbs) * %c6_up_rate% * %nscale%;
+
+*turn off reations unused in vivo or those not shown to carry flux
+v.fx("RXN-ALCD2y_FWD-gbsB_1798") = 0;
+v.fx("RXN-OAADC_FWD-maeB") = 0;
+v.fx("RXN-OAADC_FWD-pycA") = 0;
+v.fx("RXN-ACS2_FWD-ytcI") = 0;
+v.fx("RXN-FNOR_FWD-pyrK") = 0;
+v.fx("RXN-FORabc_FWD-UNKNOWN") = 0;
+v.fx("RXN-LACLabc_FWD-UNKNOWN") = 0;
+v.fx("RXN-PYRabc_FWD-UNKNOWN") = 0;
+v.fx("RXN-MALLabc_FWD-UNKNOWN") = 0;
+v.fx("RXN-FUMabc_FWD-UNKNOWN") = 0;
+v.fx("RXN-ACabc_FWD-UNKNOWN") = 0;
+v.fx("RXN-DM_TEST_FWD-SPONT") = 0;
+
+*turn off glycogen dumping
+*v.up('RXN-EXCH_glycogen_c_FWD-SPONT') = 0 * %nscale%;
+
+*turn off synthesis of deleted genes
+v.fx("PROSYN-Clo1313_0997") = 0;
+v.fx("PROSYN-Clo1313_1876") = 0;
